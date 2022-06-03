@@ -1,0 +1,30 @@
+{
+  "name": "perdhevi-landing-01",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.23",
+    "@types/pako": "^2.0.0",
+    "@types/react": "^17.0.40",
+    "@types/react-dom": "^17.0.13",
+    "@types/three": "^0.137.0",
+    "@vitejs/plugin-react": "^1.2.0",
+    "lil-gui": "^0.16.1",
+    "typescript": "^4.5.4",
+    "vite": "^2.8.0"
+  },
+  "dependencies": {
+    "nipplejs": "^0.9.1",
+    "pako": "^2.0.4",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^6.3.0",
+    "sass": "^1.49.9",
+    "three": "^0.138.0"
+  }
+}
