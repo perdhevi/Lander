@@ -19,3 +19,7 @@ May need to add few other stuff, but that's what called progression
 - npm install to set up needed modules
 - npm run dev to run the test instance, open the page http://localhost:3000/
 - npm run build to build the app, output will be in dist directory
+
+
+## Live Deployment
+- https://perdhevi.com
