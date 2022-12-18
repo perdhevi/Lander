@@ -1,13 +1,13 @@
-import * as THREE from 'three';
+import {WebGLRenderer as THREE_WebGLRenderer} from 'three';
 import { Experience } from './Experience';
 
 export default class Renderer {
     experience: Experience;
-    instance: THREE.WebGLRenderer;
+    instance: THREE_WebGLRenderer;
     applyRender: boolean = true;
     constructor() {
         this.experience = new Experience();
-        this.instance = new THREE.WebGLRenderer({
+        this.instance = new THREE_WebGLRenderer({
             canvas: this.experience.canvas
         })
         this.setup();

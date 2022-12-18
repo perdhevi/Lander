@@ -1,5 +1,26 @@
 import { Experience } from "./Experience";
-import * as THREE from 'three';
+import {
+    Group as THREE_Group,
+    MeshStandardMaterial as THREE_MeshStandardMaterial,
+    Mesh as THREE_Mesh,
+    Points as THREE_Points,
+    Vector3 as THREE_Vector3,
+    Scene as THREE_Scene,
+    HemisphereLight as THREE_HemisphereLight,
+    BufferGeometry as THREE_BufferGeometry,
+    BufferAttribute  as THREE_BufferAttribute,
+    PointsMaterial as THREE_PointsMaterial,
+    Material as THREE_Material,
+    AnimationAction as THREE_AnimationAction,
+    AnimationMixer as THREE_AnimationMixer,
+    Fog as THREE_Fog,
+    Color as THREE_Color,
+    EventListener as THREE_EventListener,
+    Event as THREE_Event,
+    DirectionalLight as THREE_DirectionalLight,
+    Raycaster as THREE_Raycaster,
+    MeshPhongMaterial as THREE_MeshPhongMaterial
+} from 'three';
 
 
 import { Vector2, Vector3 } from "three";
@@ -34,16 +55,16 @@ export default class Universe {
     loaded:boolean = false;
     gameState : number = 0;
     outroAnimation:number = 0;
-    outroLookAt!:THREE.Vector3;
+    outroLookAt!:THREE_Vector3;
     outroCast: number =0;
     outroCastList:string[] = [];
     introAnimation: number = 0;
-    scene!: THREE.Scene;
-    astronaut!: THREE.Group;
-    animationActions: THREE.AnimationAction[] = []
-    mixer!: THREE.AnimationMixer;
-    activeAction!: THREE.AnimationAction;
-    lastAction!: THREE.AnimationAction;
+    scene!: THREE_Scene;
+    astronaut!: THREE_Group;
+    animationActions: THREE_AnimationAction[] = []
+    mixer!: THREE_AnimationMixer;
+    activeAction!: THREE_AnimationAction;
+    lastAction!: THREE_AnimationAction;
     moveState = [0, 0, 0, 0];  //up, right, down, left
     mousePressed: boolean = false;
     mouseLastPost: Vector2 = new Vector2();
@@ -61,18 +82,18 @@ export default class Universe {
     delivered : number = 0;
 
     //uncomment this to debug Astronaut Position <playerGrid>
-    // rockGeometry!: THREE.BoxGeometry;
-    // rockMaterial!: THREE.MeshBasicMaterial;
-    // rock!: THREE.Mesh;
+    // rockGeometry!: THREE_BoxGeometry;
+    // rockMaterial!: THREE_MeshBasicMaterial;
+    // rock!: THREE_Mesh;
 
-    fog!: THREE.Fog;
+    fog!: THREE_Fog;
 
-    particle!: THREE.Points;
+    particle!: THREE_Points;
     
-    crateCarried!: THREE.Group;
+    crateCarried!: THREE_Group;
     carrying : boolean = false;
 
-    transparent: THREE.Material[] = [];
+    transparent: THREE_Material[] = [];
 
     constructor() {
         if (universeInstance) {
@@ -90,13 +111,13 @@ export default class Universe {
     }
 
     setup() {
-        this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x000044);
+        this.scene = new THREE_Scene();
+        this.scene.background = new THREE_Color(0x000044);
 
         //uncomment this to debug Astronaut Position <playerGrid>
-        // this.rockGeometry = new THREE.BoxGeometry(10, 2, 10);
-        // this.rockMaterial = new THREE.MeshBasicMaterial({ color: 0x0000FFF, side: THREE.DoubleSide });
-        // this.rock = new THREE.Mesh(this.rockGeometry, this.rockMaterial);
+        // this.rockGeometry = new THREE_BoxGeometry(10, 2, 10);
+        // this.rockMaterial = new THREE_MeshBasicMaterial({ color: 0x0000FFF, side: THREE_DoubleSide });
+        // this.rock = new THREE_Mesh(this.rockGeometry, this.rockMaterial);
         // this.scene.add(this.rock);
   
         this.resizeHUD();
@@ -367,7 +388,7 @@ export default class Universe {
         }
     }
 
-    doneKneeling : THREE.EventListener<THREE.Event, "loop", THREE.AnimationMixer> = (e) =>{
+    doneKneeling : THREE_EventListener<THREE_Event, "loop", THREE_AnimationMixer> = (e) =>{
         const univ = (new Universe);
         let v = univ.astronautPosition();        
         if(!this.carrying){
@@ -416,16 +437,16 @@ export default class Universe {
     }
 
     setupLights() {
-        const hemiLight = new THREE.HemisphereLight(0xD5D5D5, 0xD89726);
+        const hemiLight = new THREE_HemisphereLight(0xD5D5D5, 0xD89726);
         hemiLight.position.set(0, 500, 0);
         this.scene.add(hemiLight);
 
-        const directionalLight = new THREE.DirectionalLight(0x8888ff, 0.4);
+        const directionalLight = new THREE_DirectionalLight(0x8888ff, 0.4);
         directionalLight.position.y = 100;
         directionalLight.position.x = 100;
         this.scene.add(directionalLight);
 
-        //        this.fog = new THREE.Fog(0x999999, 10, 400);
+        //        this.fog = new THREE_Fog(0x999999, 10, 400);
         //        this.scene.fog = this.fog;
     }
 
@@ -472,7 +493,7 @@ export default class Universe {
     }
 
     frontObjRayCast() {
-        const raycaster = new THREE.Raycaster();
+        const raycaster = new THREE_Raycaster();
         const p = new Vector2();
         p.x = 0;
         p.y = -0.06;
@@ -489,11 +510,11 @@ export default class Universe {
             if ((o != this.map.plane)
                 && (o != this.astronaut)
                 && (o.name.substring(0, 5) != 'grass')) {
-                const m: THREE.Mesh = <THREE.Mesh>intersects[i].object;
+                const m: THREE_Mesh = <THREE_Mesh>intersects[i].object;
 
-                (<THREE.MeshStandardMaterial>m.material).opacity = 0.5;
+                (<THREE_MeshStandardMaterial>m.material).opacity = 0.5;
 
-                this.transparent.push((<THREE.MeshStandardMaterial>m.material));
+                this.transparent.push((<THREE_MeshStandardMaterial>m.material));
             }
 
         }
@@ -654,8 +675,8 @@ export default class Universe {
         }
     }
     setAntenaOpacity(n:number){        
-        const m: THREE.Mesh = <THREE.Mesh>this.map.antena.children[0];
-        let mat = (<THREE.MeshPhongMaterial>m.material)
+        const m: THREE_Mesh = <THREE_Mesh>this.map.antena.children[0];
+        let mat = (<THREE_MeshPhongMaterial>m.material)
         mat.transparent = true;
         mat.opacity = n;
     }
@@ -857,19 +878,19 @@ export default class Universe {
     }
 
     createStars() {
-        const particleGeometry = new THREE.BufferGeometry();
+        const particleGeometry = new THREE_BufferGeometry();
         const count = 1000;
         const positions = new Float32Array(count * 3);
         for (let i = 0; i < count * 3; i++) {
             positions[i] = (Math.random() - 0.5) * 1000;
             if(i % 3 == 1) positions[i + 1000];
         }
-        particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const particleMaterial = new THREE.PointsMaterial({
+        particleGeometry.setAttribute('position', new THREE_BufferAttribute(positions, 3));
+        const particleMaterial = new THREE_PointsMaterial({
             size: 1,
             sizeAttenuation: true
         });
-        this.particle = new THREE.Points(particleGeometry, particleMaterial);
+        this.particle = new THREE_Points(particleGeometry, particleMaterial);
         this.scene.add(this.particle);
     }
 
@@ -894,7 +915,7 @@ export default class Universe {
     }
 
     setAction = (toAction: number, fadeOutTime:number = 0.1, fadeInTime: number = 0.1) => {
-        let act:THREE.AnimationAction = this.animationActions[toAction] 
+        let act:THREE_AnimationAction = this.animationActions[toAction] 
         if (this.activeAction != act) {
             this.lastAction = this.activeAction;
             this.activeAction = act;

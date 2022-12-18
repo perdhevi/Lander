@@ -1,4 +1,20 @@
 import * as THREE from 'three'
+import {
+  Group as THREE_Group,
+  Scene as THREE_Scene,
+  PlaneGeometry as THREE_PlaneGeometry,
+  MeshStandardMaterial as THREE_MeshStandardMaterial,
+  Mesh as THREE_Mesh,
+  ConeGeometry as THREE_ConeGeometry,
+  MeshBasicMaterial as THREE_MeshBasicMaterial,
+  SphereGeometry  as THREE_SphereGeometry,
+  TextureLoader as THREE_TextureLoader,
+  Texture as THREE_Texture,
+  BoxGeometry as THREE_BoxGeometry,
+  RepeatWrapping as THREE_RepeatWrapping,
+  DoubleSide as THREE_DoubleSide,
+  Vector2 as THREE_Vector2
+} from 'three'
 
 import TextureURL from '../images/planet_color.jpg';
 //import TextureRoughnessURL from '../images/planet_texture.jpg';
@@ -15,10 +31,10 @@ export class Rock {
   y: number = -1;
   type: number = 0;
   direction: number = 0;
-  rock!: THREE.Group;
+  rock!: THREE_Group;
   rockModelIndex: number = 0;
   highlightTile: boolean = false;
-  hightLightModel!: THREE.Group;
+  hightLightModel!: THREE_Group;
 }
 
 class RockFormation {
@@ -33,7 +49,7 @@ export class Crate  {
   x: number=0;
   y: number = 0;
   opened:boolean = false;
-  crate: THREE.Group | undefined;
+  crate: THREE_Group | undefined;
 }
 
 
@@ -46,7 +62,7 @@ export class Grass {
 
   type: number = 0;
 
-  grass!: THREE.Group;
+  grass!: THREE_Group;
 }
 export class Tile {
   type: number = 0;  // 0:walkable 1:not walkable
@@ -120,44 +136,44 @@ export default class Map {
   cratesCount:number = 5;
   map: Tile[][] = [];
 
-  scene!: THREE.Scene;
+  scene!: THREE_Scene;
 
-  planeGeometry!: THREE.PlaneGeometry;
-  planeMaterial!: THREE.MeshStandardMaterial;
-  plane!: THREE.Mesh;
+  planeGeometry!: THREE_PlaneGeometry;
+  planeMaterial!: THREE_MeshStandardMaterial;
+  plane!: THREE_Mesh;
 
-  startGeometry!: THREE.ConeGeometry
-  startMaterial!: THREE.MeshBasicMaterial;
-  start!: THREE.Mesh;
+  startGeometry!: THREE_ConeGeometry
+  startMaterial!: THREE_MeshBasicMaterial;
+  start!: THREE_Mesh;
 
 
-  fruitGeometry: THREE.SphereGeometry[] = [];
-  fruitMaterial: THREE.MeshBasicMaterial[] = [];
-  fruit: THREE.Mesh[] = [];
+  fruitGeometry: THREE_SphereGeometry[] = [];
+  fruitMaterial: THREE_MeshBasicMaterial[] = [];
+  fruit: THREE_Mesh[] = [];
 
   rocks: Rock[] = [];
   grass: Grass[] = [];
   crates: Crate[] = [];
 
-  borderWallSouth: THREE.Group[] = [];
-  borderWallNorth: THREE.Group[] = [];
-  borderWallEast: THREE.Group[] = [];
-  borderWallWest: THREE.Group[] = [];
+  borderWallSouth: THREE_Group[] = [];
+  borderWallNorth: THREE_Group[] = [];
+  borderWallEast: THREE_Group[] = [];
+  borderWallWest: THREE_Group[] = [];
 
 
-  textureLoader = new THREE.TextureLoader();
-  planeColor!: THREE.Texture;
-  planeNormal!: THREE.Texture;
-  planeRoughness!: THREE.Texture;
+  textureLoader = new THREE_TextureLoader();
+  planeColor!: THREE_Texture;
+  planeNormal!: THREE_Texture;
+  planeRoughness!: THREE_Texture;
 
-  platformGeometry! : THREE.BoxGeometry;
-  platformMateria! : THREE.MeshBasicMaterial;
-  platform!: THREE.Mesh;
+  platformGeometry! : THREE_BoxGeometry;
+  platformMateria! : THREE_MeshBasicMaterial;
+  platform!: THREE_Mesh;
 
-  antena!: THREE.Group;
-  pod!: THREE.Group;
+  antena!: THREE_Group;
+  pod!: THREE_Group;
 
-  constructor(_scene: THREE.Scene) {
+  constructor(_scene: THREE_Scene) {
     console.log('Map instantiate');
     this.scene = _scene;
     this.generateMap();
@@ -312,26 +328,26 @@ export default class Map {
   }
 
   createPlane() {
-    this.planeGeometry = new THREE.PlaneGeometry((this.width + 2) * this.tileSize, (this.height + 2) * this.tileSize);
+    this.planeGeometry = new THREE_PlaneGeometry((this.width + 2) * this.tileSize, (this.height + 2) * this.tileSize);
     this.planeColor = this.textureLoader.load(TextureURL);
     this.planeRoughness = this.textureLoader.load(TextureURL);//TextureRoughnessURL);
-    this.planeRoughness.wrapS = THREE.RepeatWrapping;
-    this.planeRoughness.wrapT = THREE.RepeatWrapping;
+    this.planeRoughness.wrapS = THREE_RepeatWrapping;
+    this.planeRoughness.wrapT = THREE_RepeatWrapping;
     this.planeRoughness.repeat.set(this.width, this.height);
 
     this.planeNormal = this.textureLoader.load(TextureNormalURL);
-    this.planeMaterial = new THREE.MeshStandardMaterial({ map: this.planeColor, roughnessMap: this.planeRoughness, normalMap: this.planeRoughness, side: THREE.DoubleSide });
+    this.planeMaterial = new THREE_MeshStandardMaterial({ map: this.planeColor, roughnessMap: this.planeRoughness, normalMap: this.planeRoughness, side: THREE_DoubleSide });
 
-    this.plane = new THREE.Mesh(this.planeGeometry, this.planeMaterial);
+    this.plane = new THREE_Mesh(this.planeGeometry, this.planeMaterial);
     this.plane.rotateX(Math.PI / 2);
     this.plane.position.x -= this.tileSize / 2;
     this.plane.position.z -= this.tileSize / 2;
     this.scene.add(this.plane);
 
 
-    this.platformGeometry = new THREE.BoxGeometry( this.tileSize * 4, 0.25, this.tileSize * 4);
-    this.platformMateria = new THREE.MeshBasicMaterial({color: 0x7b4234}); //{  color: 0x7b4234 }
-    this.platform = new THREE.Mesh(this.platformGeometry, this.platformMateria);
+    this.platformGeometry = new THREE_BoxGeometry( this.tileSize * 4, 0.25, this.tileSize * 4);
+    this.platformMateria = new THREE_MeshBasicMaterial({color: 0x7b4234}); //{  color: 0x7b4234 }
+    this.platform = new THREE_Mesh(this.platformGeometry, this.platformMateria);
 
     this.platform.position.x = -this.tileSize/2;//(this.width * this.tileSize /2);
     this.platform.position.z = -this.tileSize/2;//(this.height * this.tileSize /2);
@@ -377,8 +393,8 @@ export default class Map {
     for (let i = 0; i < this.width / 10; i++) {
       const index = Math.floor(Math.random() * 2);
       let wall = res.cliff[1].clone();
-      (<THREE.Mesh>wall.children[0]).material = res.environmentMaterial.clone();
-      (<THREE.MeshStandardMaterial>(<THREE.Mesh>(wall.children[0])).material).transparent = true;
+      (<THREE_Mesh>wall.children[0]).material = res.environmentMaterial.clone();
+      (<THREE_MeshStandardMaterial>(<THREE_Mesh>(wall.children[0])).material).transparent = true;
 
       wall.position.x = (i * this.tileSize * 12) - ((this.width * this.tileSize) / 2);
       wall.position.z = -(this.height * this.tileSize / 2) - (this.tileSize * 6);
@@ -395,8 +411,8 @@ export default class Map {
     for (let i = 0; i < this.height / 2; i++) {
       const index = Math.floor(Math.random() * 2);
       let wall = res.cliff[1].clone();
-      (<THREE.Mesh>wall.children[0]).material = res.environmentMaterial.clone();
-      (<THREE.MeshStandardMaterial>(<THREE.Mesh>(wall.children[0])).material).transparent = true;
+      (<THREE_Mesh>wall.children[0]).material = res.environmentMaterial.clone();
+      (<THREE_MeshStandardMaterial>(<THREE_Mesh>(wall.children[0])).material).transparent = true;
       wall.rotation.y = Math.PI / 2
       wall.position.z = (i * this.tileSize * 12) - ((this.width * this.tileSize) / 2);
       wall.position.x = -(this.height * this.tileSize / 2) - (this.tileSize * 6);
@@ -421,8 +437,8 @@ export default class Map {
       //console.log('rocks #', i, ' index ', index)
       const index = this.rocks[i].rockModelIndex;
       this.rocks[i].rock = res.cliff[index].clone();
-      (<THREE.Mesh>this.rocks[i].rock.children[0]).material = res.environmentMaterial.clone();
-      (<THREE.MeshStandardMaterial>(<THREE.Mesh>(this.rocks[i].rock.children[0])).material).transparent = true;
+      (<THREE_Mesh>this.rocks[i].rock.children[0]).material = res.environmentMaterial.clone();
+      (<THREE_MeshStandardMaterial>(<THREE_Mesh>(this.rocks[i].rock.children[0])).material).transparent = true;
 
 
       this.rocks[i].rock.position.x = (this.rocks[i].x * this.tileSize) - (this.width * 5) + ((this.rocks[i].width - 1) / 2 * this.tileSize);
@@ -432,15 +448,15 @@ export default class Map {
       this.scene.add(this.rocks[i].rock)
 
       if (this.rocks[i].highlightTile) {
-        const rockMaterial = new THREE.MeshBasicMaterial({ color: 0x7b4234, side: THREE.DoubleSide });
-        this.rocks[i].hightLightModel = new THREE.Group();
+        const rockMaterial = new THREE_MeshBasicMaterial({ color: 0x7b4234, side: THREE_DoubleSide });
+        this.rocks[i].hightLightModel = new THREE_Group();
         let mapX = this.rocks[i].x;
         let mapY = this.rocks[i].y;
         for (var w = 0; w < this.rocks[i].width; w++) {
           for (var h = 0; h < this.rocks[i].height; h++) {
             if (this.map[mapX + w][mapY + h].type === 1) {
-              const rockGeometry = new THREE.BoxGeometry(this.tileSize, 2, this.tileSize);
-              const rockMesh = new THREE.Mesh(rockGeometry, rockMaterial);
+              const rockGeometry = new THREE_BoxGeometry(this.tileSize, 2, this.tileSize);
+              const rockMesh = new THREE_Mesh(rockGeometry, rockMaterial);
               rockMesh.position.x = (w * this.tileSize) - ((this.rocks[i].width - 1) / 2 * this.tileSize);
               rockMesh.position.z = (h * this.tileSize) - ((this.rocks[i].height - 1) / 2 * this.tileSize);
               this.rocks[i].hightLightModel.add(rockMesh);
@@ -482,7 +498,7 @@ export default class Map {
   }
 
   getGridPosition(x: number, y: number) {
-    let result = new THREE.Vector2();
+    let result = new THREE_Vector2();
     result.x = Math.round((x + (this.width * 5)) / this.tileSize);
     result.y = Math.round((y + (this.height * 5)) / this.tileSize);
 

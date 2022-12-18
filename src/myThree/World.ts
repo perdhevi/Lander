@@ -1,4 +1,23 @@
-import * as THREE from 'three';
+import {
+    Texture as THREE_Texture,
+    BoxGeometry as THREE_BoxGeometry,
+    MeshBasicMaterial as THREE_MeshBasicMaterial,
+    Group as THREE_Group,
+    SphereGeometry  as THREE_SphereGeometry,
+    MeshStandardMaterial as THREE_MeshStandardMaterial,
+    Mesh as THREE_Mesh,
+    TextureLoader as THREE_TextureLoader,
+    Points as THREE_Points,
+    Vector3 as THREE_Vector3,
+    Scene as THREE_Scene,
+    HemisphereLight as THREE_HemisphereLight,
+    PointLight as    THREE_PointLight,
+    BufferGeometry as THREE_BufferGeometry,
+    BufferAttribute  as THREE_BufferAttribute,
+    PointsMaterial as THREE_PointsMaterial,
+    Material as THREE_Material
+    } 
+from 'three'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import keyboardFBXURL from './models/keyboard.dat?url';
 import shipFBXURL from './models/objects/escape-world.dat?url';
@@ -18,34 +37,34 @@ export default class World {
     switchUp: boolean = false;
     animationState: number = 0;
     textOpacity: number = 1;
-    texture!: THREE.Texture;
+    texture!: THREE_Texture;
     screenAdd: number = 0;
     phaseTime: number = 0;
 
     //may need to split this to a new class Actor
-    geometry!: THREE.BoxGeometry;
-    material!: THREE.MeshBasicMaterial;
-    keyboard!: THREE.Group;
-    ship!:THREE.Group;
+    geometry!: THREE_BoxGeometry;
+    material!: THREE_MeshBasicMaterial;
+    keyboard!: THREE_Group;
+    ship!:THREE_Group;
 
-    planetGeometry!: THREE.SphereGeometry;
-    planetMaterial!: THREE.MeshStandardMaterial;
-    planet!: THREE.Mesh;
+    planetGeometry!: THREE_SphereGeometry;
+    planetMaterial!: THREE_MeshStandardMaterial;
+    planet!: THREE_Mesh;
 
-    textureLoader = new THREE.TextureLoader();
-    planetColor!: THREE.Texture;
-    planetNormal!: THREE.Texture;
-    planetRoughness!: THREE.Texture;
+    textureLoader = new THREE_TextureLoader();
+    planetColor!: THREE_Texture;
+    planetNormal!: THREE_Texture;
+    planetRoughness!: THREE_Texture;
 
-    particle!: THREE.Points;
+    particle!: THREE_Points;
 
-    lookPosition!: THREE.Vector3;
+    lookPosition!: THREE_Vector3;
     lerpAlpha: number = 0.0001;
 
-    scene!: THREE.Scene;
+    scene!: THREE_Scene;
 
-    hemiLight! : THREE.HemisphereLight;
-    pointLight! : THREE.PointLight;
+    hemiLight! : THREE_HemisphereLight;
+    pointLight! : THREE_PointLight;
     constructor() {
         //super();
         this.experience = new Experience();
@@ -56,21 +75,21 @@ export default class World {
 
     setup() {
         //super.setup();
-        this.scene = new THREE.Scene();
-        this.hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
+        this.scene = new THREE_Scene();
+        this.hemiLight = new THREE_HemisphereLight(0xffffff, 0x444444);
         this.hemiLight.position.set(0, 0, 0);
         this.scene.add(this.hemiLight);
 
-        this.pointLight = new THREE.PointLight(0xFFFFFF,0.01,0);
+        this.pointLight = new THREE_PointLight(0xFFFFFF,0.01,0);
         this.scene.add(this.pointLight);
 
-        this.planetGeometry = new THREE.SphereGeometry(15, 32, 32);
+        this.planetGeometry = new THREE_SphereGeometry(15, 32, 32);
 
         this.planetColor = this.textureLoader.load(TextureURL);
         this.planetNormal = this.textureLoader.load(TextureNormalURL);
         this.planetRoughness = this.textureLoader.load(TextureRoughnessURL);
-        this.planetMaterial = new THREE.MeshStandardMaterial({ map: this.planetColor, roughnessMap: this.planetRoughness, normalMap: this.planetNormal });
-        this.planet = new THREE.Mesh(this.planetGeometry, this.planetMaterial);
+        this.planetMaterial = new THREE_MeshStandardMaterial({ map: this.planetColor, roughnessMap: this.planetRoughness, normalMap: this.planetNormal });
+        this.planet = new THREE_Mesh(this.planetGeometry, this.planetMaterial);
         this.planet.position.z = 200;
         this.planet.position.x = 200;
 
@@ -138,16 +157,16 @@ export default class World {
        
     }
 
-    cleanFBX(g : THREE.Group){
+    cleanFBX(g : THREE_Group){
         g.children.forEach((val) => {
-            if(typeof val == typeof THREE.Mesh){
-                let v = (<THREE.Mesh>val);
+            if(typeof val == typeof THREE_Mesh){
+                let v = (<THREE_Mesh>val);
                 v.geometry.dispose();
-                if(typeof v.material == typeof THREE.Material)
-                    (<THREE.Material>v.material).dispose();
+                if(typeof v.material == typeof THREE_Material)
+                    (<THREE_Material>v.material).dispose();
                 else
                 if(typeof v.material == typeof Array){
-                    (<Array<THREE.Material>>v.material).forEach((m=>{
+                    (<Array<THREE_Material>>v.material).forEach((m=>{
                         m.dispose();
                     }))
                 }
@@ -199,7 +218,7 @@ export default class World {
 
                 if (this.experience.time.elapsed - this.phaseTime >= -300) {
                     this.animationState++;
-                    this.lookPosition = new THREE.Vector3(0, 0, -100);
+                    this.lookPosition = new THREE_Vector3(0, 0, -100);
                     this.experience.camera.instance.lookAt(this.lookPosition);
                 }
                 break;
@@ -315,18 +334,18 @@ export default class World {
     }
 
     createStars() {
-        const particleGeometry = new THREE.BufferGeometry();
+        const particleGeometry = new THREE_BufferGeometry();
         const count = 1000;
         const positions = new Float32Array(count * 3);
         for (let i = 0; i < count * 3; i++) {
             positions[i] = (Math.random() - 0.5) * 1000;
         }
-        particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const particleMaterial = new THREE.PointsMaterial({
+        particleGeometry.setAttribute('position', new THREE_BufferAttribute(positions, 3));
+        const particleMaterial = new THREE_PointsMaterial({
             size: 1,
             sizeAttenuation: true
         });
-        this.particle = new THREE.Points(particleGeometry, particleMaterial);
+        this.particle = new THREE_Points(particleGeometry, particleMaterial);
         this.scene.add(this.particle);
     }
 

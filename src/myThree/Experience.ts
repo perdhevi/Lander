@@ -3,7 +3,7 @@ declare global {
 }
 import Size from './utils/Sizes';
 import Time from './utils/Time';
-import * as THREE from 'three';
+import {Scene as THREE_Scene }  from 'three';
 import Camera from './Camera';
 import Renderer from './Renderer';
 import World from './World';
@@ -17,7 +17,7 @@ export class Experience {
   canvas?: HTMLCanvasElement;
   sizes: Size = new Size();
   time: Time = new Time();
-  scene!: THREE.Scene;
+  scene!: THREE_Scene;
   camera!: Camera;
   renderer!: Renderer;
   world!: World;

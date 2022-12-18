@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './style.scss'
-import photoUrl from './images/myPhoto.jpg';
+//import photoUrl from './images/myPhoto.jpg';
 import ProductList from './ProductList';
 import { BlogList } from './BlogList';
 import linkedIn from './images/linkedin.svg'
@@ -13,10 +13,10 @@ function App() {
   return (
     <div className="App">
       <div className="detail">
-        <div className="half" >
+        {/* <div className="half" >
           <img id="myPhoto" src={photoUrl} />
 
-        </div>
+        </div> */}
         <section className="detailContent">
           <div className="textContent">
             Hi There,

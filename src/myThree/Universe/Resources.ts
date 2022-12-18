@@ -34,6 +34,18 @@ import pod from '../models/objects/escape.dat?url';
 import Universe from '../Universe';
 
 import * as THREE from 'three';
+import {
+    Group as THREE_Group,
+    TextureLoader as THREE_TextureLoader,
+    Texture as THREE_Texture,
+    MeshStandardMaterial as THREE_MeshStandardMaterial,
+    BoxGeometry as THREE_BoxGeometry,
+    Material as THREE_Material,
+    AnimationMixer as THREE_AnimationMixer,
+    Object3D as THREE_Object3D,
+    Mesh as THREE_Mesh,
+    MeshBasicMaterial as THREE_MeshBasicMaterial
+} from 'three'
 import * as pako from 'pako';
 
 let resourceInstance: Resources | undefined = undefined;
@@ -44,9 +56,9 @@ enum EnvironmentType {
     object
 }
 
-type ObjectLoaded = (object : THREE.Group) => void;
+type ObjectLoaded = (object : THREE_Group) => void;
 
-export class RocksModel extends THREE.Group {
+export class RocksModel extends THREE_Group {
     width: number = 0;
     height: number = 0;
     constructor() {
@@ -62,17 +74,17 @@ export default class Resources extends EventEmitter {
     objectScale: number = 5;
 
     loader = new FBXLoader();
-    textureLoader = new THREE.TextureLoader();
-    environmentTexture!: THREE.Texture;
-    environmentMaterial!: THREE.MeshStandardMaterial;
+    textureLoader = new THREE_TextureLoader();
+    environmentTexture!: THREE_Texture;
+    environmentMaterial!: THREE_MeshStandardMaterial;
 
     cliff: RocksModel[] = [];
-    plant: THREE.Group[] = [];
+    plant: THREE_Group[] = [];
 
-    objects: THREE.Group[] = [];
+    objects: THREE_Group[] = [];
 
-    crateGeometry! : THREE.BoxGeometry;
-    crateMaterial! : THREE.Material;
+    crateGeometry! : THREE_BoxGeometry;
+    crateMaterial! : THREE_Material;
 
     constructor() {
         if (resourceInstance) {
@@ -96,7 +108,7 @@ export default class Resources extends EventEmitter {
     //         const res = (new Resources);
     //         let universe = new Universe();
     //         const animationAction = universe.mixer.clipAction(
-    //             (object as THREE.Object3D).animations[0]
+    //             (object as THREE_Object3D).animations[0]
     //         )
     //         universe.astronaut.animations.splice(index,0,(object.animations[0]));
     //         universe.animationActions.splice(index,0,(animationAction));
@@ -122,7 +134,7 @@ export default class Resources extends EventEmitter {
             let universe = new Universe();
             universe.astronaut = object;
             //universe.astronaut.castShadow = true;
-            universe.mixer = new THREE.AnimationMixer(object);
+            universe.mixer = new THREE_AnimationMixer(object);
             const res = (new Resources);
             res.progressStatus();
             // res.loadAstronautAnimation(astronautFBXIdle, 0);
@@ -134,7 +146,7 @@ export default class Resources extends EventEmitter {
             this.loadUsingPako(astronautFBXIdle, (object) => {
                 const res = (new Resources);
                 const animationAction = universe.mixer.clipAction(
-                    (object as THREE.Object3D).animations[0]
+                    (object as THREE_Object3D).animations[0]
                 )
                 universe.astronaut.animations.push(object.animations[0]);
                 universe.animationActions.push(animationAction);
@@ -143,7 +155,7 @@ export default class Resources extends EventEmitter {
                 this.loadUsingPako(astronautFBXStandardRun, (object) => {
                     const res = (new Resources);
                     const animationAction = universe.mixer.clipAction(
-                        (object as THREE.Object3D).animations[0]
+                        (object as THREE_Object3D).animations[0]
                     )
                     universe.astronaut.animations.push(object.animations[0]);
                     universe.animationActions.push(animationAction);
@@ -151,14 +163,14 @@ export default class Resources extends EventEmitter {
 
                     this.loadUsingPako(astronautFBXKneel, (object) => {
                         const animationAction = universe.mixer.clipAction(
-                            (object as THREE.Object3D).animations[0]
+                            (object as THREE_Object3D).animations[0]
                         )
                         universe.astronaut.animations.push(object.animations[0]);
                         universe.animationActions.push(animationAction);
                         res.progressStatus();
                         this.loadUsingPako(astronautFBXidleCarry, (object) => {
                             const animationAction = universe.mixer.clipAction(
-                                (object as THREE.Object3D).animations[0]
+                                (object as THREE_Object3D).animations[0]
                             )
                             universe.astronaut.animations.push(object.animations[0]);
                             universe.animationActions.push(animationAction);
@@ -166,7 +178,7 @@ export default class Resources extends EventEmitter {
 
                             this.loadUsingPako(astronautFBXrunCarry, (object) => {
                                 const animationAction = universe.mixer.clipAction(
-                                    (object as THREE.Object3D).animations[0]
+                                    (object as THREE_Object3D).animations[0]
                                 )
                                 universe.astronaut.animations.push(object.animations[0]);
                                 universe.animationActions.push(animationAction);
@@ -184,7 +196,7 @@ export default class Resources extends EventEmitter {
         const res = (new Resources());
         
         this.loadUsingPako(path, (object) => {
-            let child = <THREE.Mesh>(object.children[0]);
+            let child = <THREE_Mesh>(object.children[0]);
             if((type == EnvironmentType.cliff)||(type == EnvironmentType.plant)){
                 child.material = res.environmentMaterial.clone();
             };
@@ -221,7 +233,7 @@ export default class Resources extends EventEmitter {
         this.textureLoader.load(color_swatch, (texture) => {
             const res = (new Resources());
             res.environmentTexture = texture;
-            res.environmentMaterial = new THREE.MeshStandardMaterial({ map: texture });
+            res.environmentMaterial = new THREE_MeshStandardMaterial({ map: texture });
             //res.environmentMaterial.transparent= true;
             res.environmentMaterial.opacity = 1;
             (new Resources).progressStatus();
@@ -254,10 +266,10 @@ export default class Resources extends EventEmitter {
         res.loadEnvObject(antena, EnvironmentType.object, 1, 'antena',0,0,0, 0.07);
         res.loadEnvObject(pod, EnvironmentType.object, 2, 'escape',0,0,0, 0.07);
         
-        this.crateGeometry = new THREE.BoxGeometry(4.5,5,4.5);
-        this.crateMaterial = new THREE.MeshBasicMaterial({ color: 0x0000FF });
+        this.crateGeometry = new THREE_BoxGeometry(4.5,5,4.5);
+        this.crateMaterial = new THREE_MeshBasicMaterial({ color: 0x0000FF });
         let univ = (new Universe); 
-        univ.crateCarried = new THREE.Group().add( new THREE.Mesh(this.crateGeometry, this.crateMaterial));
+        univ.crateCarried = new THREE_Group().add( new THREE_Mesh(this.crateGeometry, this.crateMaterial));
         univ.crateCarried.position.y = 1000;
         univ.scene.add(univ.crateCarried);
     }

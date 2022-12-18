@@ -1,13 +1,13 @@
-import * as THREE from 'three';
+import {Scene as THREE_Scene, PerspectiveCamera as THREE_PerspectiveCamera }  from 'three';
 import { Experience } from './Experience';
 import Size from './utils/Sizes';
 
 export default class Camera {
     experience: Experience;
     sizes: Size;
-    scene: THREE.Scene;
+    scene: THREE_Scene;
     canvas?: HTMLCanvasElement;
-    instance: THREE.PerspectiveCamera;
+    instance: THREE_PerspectiveCamera;
     enableProjectionRecalc: boolean = false;
 
     constructor() {
@@ -15,7 +15,7 @@ export default class Camera {
         this.sizes = this.experience.sizes;
         this.scene = this.experience.scene;
         this.canvas = this.experience.canvas;
-        this.instance = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.02);
+        this.instance = new THREE_PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.02);
         this.setup();
     }
 
