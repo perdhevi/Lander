@@ -312,25 +312,28 @@ export default class World {
             let w = window.outerWidth;
 // set height = innerWidth * proportion            
 // and height = height *0.5 + this.screenAdd
-            let h = w * proportion * 0.5 + this.screenAdd;
+            let ht = w * proportion * 0.5 + this.screenAdd;
 
             //console.log('calc height',h);
-            return h;
+            return ht;
         }else{
             return window.innerHeight;
         }
     }
 
     hideReactApp() {
-        const reactApp: HTMLElement | null = document.getElementById('root');
-        if (reactApp)
-            switch (this.animationState) {
-                case 2:
-                    reactApp.style.opacity = String(this.textOpacity);
-                    break;
-                case 3:
-                    reactApp.hidden = true;
-            }
+        // The page is rendered into two React roots, above (#top) and below (#root) the scene.
+        ['top', 'root'].forEach((id) => {
+            const reactApp: HTMLElement | null = document.getElementById(id);
+            if (reactApp)
+                switch (this.animationState) {
+                    case 2:
+                        reactApp.style.opacity = String(this.textOpacity);
+                        break;
+                    case 3:
+                        reactApp.hidden = true;
+                }
+        });
     }
 
     createStars() {

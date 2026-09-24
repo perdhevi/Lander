@@ -1,0 +1,174 @@
+// Layout for the home page — ported from design/Home.dc.html (Modernist design system).
+// Tokens come from ./modernist.css; never hard-code colours or fonts here.
+
+$rule: 2px solid var(--color-divider);
+$section-pad: clamp(36px, 5vw, 64px);
+
+a { color: var(--color-accent-700); }
+a:hover { color: var(--color-accent-800); }
+
+.page {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  padding: 0 clamp(20px, 5vw, 56px);
+}
+.page-inner { max-width: 1120px; margin: 0 auto; }
+
+// Shared type bits
+.eyebrow {
+  font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-weight: 600; color: var(--color-neutral-700);
+}
+.label-strong {
+  font-family: var(--font-heading); font-weight: 800; font-size: 12px;
+  letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none;
+}
+.section-title {
+  font-family: var(--font-heading); font-weight: 800; font-size: 13px;
+  letter-spacing: 0.14em; text-transform: uppercase; margin: 6px 0 0;
+}
+.section-lead {
+  margin: 0 0 24px; font-size: clamp(16px, 1.5vw, 19px); line-height: 1.5; max-width: 34em;
+}
+
+// Header
+.site-header {
+  display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: baseline; justify-content: space-between;
+  padding: 22px 0 18px; border-bottom: $rule;
+  .brand { font-family: var(--font-heading); font-weight: 800; font-size: 15px; letter-spacing: 0.14em; text-transform: uppercase; }
+  nav { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+  nav a { color: var(--color-text); text-decoration: none; }
+  nav a:hover { color: var(--color-accent); }
+}
+
+// Hero
+.hero {
+  padding: clamp(40px, 7vw, 84px) 0 clamp(32px, 5vw, 56px); border-bottom: $rule;
+  .hero-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .tag { font-family: var(--font-heading); font-weight: 800; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; padding: 5px 9px; }
+  .hero-meta .eyebrow { letter-spacing: 0.12em; }
+  h1 {
+    font-size: clamp(40px, 7.2vw, 84px); line-height: 1.02; letter-spacing: -0.03em;
+    margin: 0 0 28px; text-wrap: balance; max-width: 14em;
+  }
+  p { font-size: clamp(17px, 1.7vw, 21px); line-height: 1.5; max-width: 34em; margin: 0 0 18px; }
+  p.muted { color: var(--color-neutral-700); margin-bottom: 32px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn { justify-content: flex-start; font-size: 15px; padding: 13px 20px; text-decoration: none; }
+  .btn-primary, .btn-primary:hover { color: var(--color-bg); }
+  .btn-secondary, .btn-secondary:hover { color: var(--color-text); }
+}
+
+// Stats strip
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); border-bottom: $rule;
+  .stat { padding: 28px 24px; border-right: $rule; }
+  .stat:first-child { padding-left: 0; }
+  .stat:last-child { padding-right: 0; border-right: 0; }
+  .value { font-family: var(--font-heading); font-weight: 800; font-size: clamp(36px, 4.5vw, 52px); line-height: 1; letter-spacing: -0.03em; }
+  .value.accent { color: var(--color-accent); }
+  .eyebrow { margin-top: 8px; }
+  @media (max-width: 640px) {
+    .stat { padding: 20px 0; border-right: 0; border-bottom: $rule; }
+    .stat:last-child { border-bottom: 0; }
+  }
+}
+
+// Two-column "label | content" sections (Now, Writing, Record, Certs)
+.split {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr); gap: 32px 48px;
+  padding: $section-pad 0; border-bottom: $rule;
+  @media (max-width: 720px) { grid-template-columns: minmax(0, 1fr); }
+}
+.rows > .row { padding: 18px 0; border-top: $rule; }
+.rows > .row:first-child { padding-top: 0; border-top: 0; }
+.rows > .row:last-child { padding-bottom: 0; }
+.row-title { font-weight: 600; font-size: 16px; }
+.row-text { font-size: 15px; color: var(--color-neutral-700); }
+.row-when { font-family: var(--font-heading); font-weight: 800; font-size: 14px; letter-spacing: 0.02em; }
+
+.now .row { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 24px; padding: 20px 0; }
+.now .row .label-strong { color: var(--color-accent-700); padding-top: 4px; }
+.now .row p { margin: 0; font-size: clamp(16px, 1.5vw, 19px); line-height: 1.5; }
+
+.record .row { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 24px; }
+.credentials .row { display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; gap: 12px 24px; align-items: baseline; }
+.credentials .row .label-strong { white-space: nowrap; }
+@media (max-width: 520px) {
+  .now .row, .record .row { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .credentials .row { grid-template-columns: minmax(0, 1fr) auto; }
+  .credentials .row .row-when { grid-column: 1 / -1; }
+}
+
+// Shelf
+.shelf {
+  padding: $section-pad 0; border-bottom: $rule;
+  .shelf-head { display: flex; flex-wrap: wrap; gap: 12px 32px; align-items: baseline; justify-content: space-between; margin-bottom: 28px; }
+  .shelf-head .section-title { margin: 0; }
+  .shelf-head p { margin: 0; font-size: 14px; color: var(--color-neutral-700); max-width: 40em; }
+  // 5 cards: 3 + 2 on desktop, 2 + 2 + 1 on tablet; the highlight card spans the leftover space.
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 560px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    article.highlight { grid-column: span 2; }
+  }
+  @media (min-width: 900px) {
+    .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  article {
+    background: var(--color-bg); box-shadow: 0 0 0 1px var(--color-divider);
+    padding: 24px 24px 26px; display: flex; flex-direction: column; gap: 10px; min-height: 210px;
+  }
+  .kicker { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; color: var(--color-accent-700); }
+  h3 { font-size: 24px; line-height: 1.1; letter-spacing: -0.02em; margin: 0; }
+  article p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--color-neutral-800); }
+  .links { margin-top: auto; display: flex; flex-wrap: wrap; gap: 18px; }
+  article.highlight { background: var(--color-accent); color: var(--color-bg); }
+  article.highlight .kicker, article.highlight p { color: var(--color-bg); }
+}
+
+// Lander (the Three.js piece) — intro strip; the scene itself lives in #app (index.html)
+.lander-intro {
+  display: flex; flex-wrap: wrap; gap: 12px 32px; align-items: baseline; justify-content: space-between;
+  padding: $section-pad 0 24px;
+  .section-title { margin: 0; }
+  p { margin: 0; font-size: 14px; color: var(--color-neutral-700); max-width: 40em; }
+}
+.lander-stage {
+  border-top: $rule; border-bottom: $rule;
+  background: #080808;
+  overflow: hidden;
+}
+
+// Writing (blog feed)
+.writing {
+  .row { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px 24px; align-items: baseline; }
+  .row-title a { color: var(--color-text); text-decoration: none; }
+  .row-title a:hover { color: var(--color-accent); }
+  .row-text p { margin: 4px 0 0; }
+  .more { display: inline-block; margin-top: 24px; }
+  @media (max-width: 520px) { .row { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+}
+
+// Contact banner
+.contact {
+  background: var(--color-accent); color: var(--color-bg);
+  margin: $section-pad 0; padding: $section-pad clamp(28px, 4vw, 56px);
+  .eyebrow { color: var(--color-bg); letter-spacing: 0.14em; margin-bottom: 24px; }
+  h2 { font-size: clamp(34px, 5.6vw, 64px); line-height: 1.04; letter-spacing: -0.03em; margin: 0 0 28px; max-width: 22em; text-wrap: balance; }
+  .cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--color-bg); color: var(--color-text);
+    font-family: var(--font-heading); font-weight: 800; font-size: clamp(16px, 1.8vw, 20px);
+    padding: 15px 22px; text-decoration: none;
+  }
+  .cta:hover { background: var(--color-neutral-200); color: var(--color-text); }
+}
+
+// Footer
+.site-footer {
+  display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: baseline; justify-content: space-between;
+  padding: 22px 0 40px; border-top: $rule;
+  .links { display: flex; flex-wrap: wrap; gap: 22px; }
+}

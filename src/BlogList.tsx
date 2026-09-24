@@ -1,57 +1,63 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react';
+import { BLOG } from './data/content';
 
+// Latest posts from the WordPress blog at blog.perdhevi.com.
 interface Post {
-	title: {
-		//This property is always present
-		rendered: string;
-		//This property is only present in some contexts
-		raw?: string;
-	},
-    content:{
-        rendered: string;
-    }
-    excerpt:{
-        rendered: string;
-    }
-	id: number;
+  id: number;
+  date: string;
+  link: string;
+  title: { rendered: string };
+  excerpt: { rendered: string };
 }
 
-function BlogList(){
+const FEED = `${BLOG}/wp-json/wp/v2/posts?per_page=3&_fields=id,date,link,title,excerpt`;
 
-    const [count, setCount] = useState(0);
-    const [blog, setBlogContent] = useState<Array<Post>>([]);
-    const [isLoaded, setLoaded] = useState(false);
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
 
-    useEffect(()=>{
-        if(!isLoaded){
-            fetch("https://blog.perdhevi.com/wp-json/wp/v2/posts?per_page=3")
-            .then(res => res.json())
-            .then((result) => {
-                setLoaded(true);
-                setBlogContent(result);
-            })
-        }
-    });
+// WordPress returns HTML; strip it so the excerpt sits in our own type styles.
+const toText = (html: string) => {
+  const el = document.createElement('div');
+  el.innerHTML = html;
+  return (el.textContent ?? '').replace(/\s*\[(…|&hellip;|\.\.\.)\]\s*$/, '…').trim();
+};
 
-    if(isLoaded) {
-    return (
-        <div className="BlogList">
-            My recently published Blogs
-            <hr />
-            {blog.map((item:Post) => (
-                <div className="blogContainer" key={"blog_"+item.id}> 
-                    <div className="blogHeader" id={"header_"+item.id} dangerouslySetInnerHTML={{__html:item.title.rendered}} />
-                    <div className="blogContent" id={"content_"+item.id} dangerouslySetInnerHTML={{__html:item.excerpt.rendered}} />
-                    <hr />
+export function BlogList() {
+  const [posts, setPosts] = useState<Post[] | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    fetch(FEED)
+      .then((res) => { if (!res.ok) throw new Error(String(res.status)); return res.json(); })
+      .then((data: Post[]) => { if (alive) setPosts(data); })
+      .catch(() => { if (alive) setFailed(true); });
+    return () => { alive = false; };
+  }, []);
+
+  return (
+    <div>
+      <p className="section-lead">Notes from whatever I'm figuring out at the moment, published on my blog.</p>
+      {failed ? (
+        <p className="row-text">The feed didn't load. Read the posts directly on the blog.</p>
+      ) : posts === null ? (
+        <p className="row-text">Loading recent posts…</p>
+      ) : (
+        <div className="rows">
+          {posts.map((p) => (
+            <div className="row" key={p.id}>
+              <div className="row-when">{fmtDate(p.date)}</div>
+              <div>
+                <div className="row-title">
+                  <a href={p.link} target="_blank" rel="noopener noreferrer">{toText(p.title.rendered)}</a>
                 </div>
-            )
-
-            )}
+                <div className="row-text"><p>{toText(p.excerpt.rendered)}</p></div>
+              </div>
+            </div>
+          ))}
         </div>
-    )
-    }else{
-        return <div>Loading blogs</div>
-    }
+      )}
+      <a className="label-strong more" href={BLOG} target="_blank" rel="noopener noreferrer">All posts on the blog →</a>
+    </div>
+  );
 }
-
-export {BlogList}

@@ -9,22 +9,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap"
-      rel="stylesheet"
-    />
-    <link
       href="https://fonts.googleapis.com/css2?family=Coming+Soon&family=Roboto&display=swap"
       rel="stylesheet"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Perdhevi's Page</title>
+    <title>Raditya Perdhevi</title>
+    <meta name="description" content="Raditya Perdhevi — software engineer in Surabaya, Indonesia. Support, application development, and hands-on AI tooling." />
   </head>
 
   <body>
+    <div id="top"></div>
+
+    <!-- Interactive Three.js lander. Kept outside React so the scene code can find its canvases on load. -->
+    <section class="lander-stage" aria-label="Interactive lander scene">
     <div id="app">
       <canvas class="webgl"> </canvas>
       <canvas class="compass"></canvas>
@@ -42,6 +39,7 @@
 
       <canvas class="frontCurtain"> </canvas>
     </div>
+    </section>
 
     <div id="root"></div>
   </body>
