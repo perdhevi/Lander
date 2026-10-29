@@ -1,17 +1,12 @@
-import { hero, nav, now, settings, shelf, stats, GITHUB, UPWORK } from '../data/content';
-import { Arrow, ExtLink } from './bits';
+import { hero, now, settings, shelf, stats, GITHUB, UPWORK } from '../data/content';
+import { Arrow, ExtLink, SiteHeader } from './bits';
 
 // Everything above the interactive lander scene.
 export default function Top() {
   return (
     <div className="page">
       <div className="page-inner">
-        <header className="site-header">
-          <div className="brand">Raditya Perdhevi</div>
-          <nav>
-            {nav.map((n) => <a key={n.href} href={n.href}>{n.label}</a>)}
-          </nav>
-        </header>
+        <SiteHeader />
 
         <section className="hero">
           <div className="hero-meta">
@@ -54,6 +49,7 @@ export default function Top() {
           <div className="shelf-head">
             <h2 className="section-title">The shelf</h2>
             <p>Things I built to understand something. Some shipped, some are still wet paint.</p>
+            <a className="label-strong" href="/collection/">Browse the collection →</a>
           </div>
           <div className="grid">
             {shelf.map((item) => (

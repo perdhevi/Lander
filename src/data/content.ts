@@ -4,6 +4,7 @@
 export const UPWORK = 'https://www.upwork.com/freelancers/~017c61ba92b2c4bb37';
 export const GITHUB = 'https://github.com/perdhevi';
 export const BLOG = 'https://blog.perdhevi.com';
+export const EMAIL = 'raditya.perdhevi@gmail.com';
 
 export const settings = {
   available: true,   // "Open to collaboration" tag in the hero
@@ -13,6 +14,7 @@ export const settings = {
 export const nav = [
   { href: '#now', label: 'Now' },
   { href: '#shelf', label: 'Shelf' },
+  { href: '/collection/', label: 'Collection' },
   { href: '#lander', label: 'Lander' },
   { href: '#writing', label: 'Writing' },
   { href: '#record', label: 'Record' },
@@ -103,4 +105,5 @@ export const socials = [
   { href: 'https://x.com/perdhevi', label: 'X' },
   { href: BLOG, label: 'Blog' },
   { href: UPWORK, label: 'Upwork' },
+  { href: `mailto:${EMAIL}`, label: 'Email' },
 ];

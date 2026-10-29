@@ -1,6 +1,6 @@
-import { credentials, record, settings, socials, UPWORK } from '../data/content';
+import { credentials, record, settings, EMAIL, UPWORK } from '../data/content';
 import { BlogList } from '../BlogList';
-import { Arrow, ExtLink } from './bits';
+import { Arrow, ExtLink, SiteFooter } from './bits';
 
 // Everything below the interactive lander scene.
 export default function Bottom() {
@@ -54,17 +54,17 @@ export default function Bottom() {
         <section id="contact" className="contact">
           <div className="eyebrow">Contact</div>
           <h2>If you have a problem worth solving, I'd like to hear about it.</h2>
-          <ExtLink className="cta" href={UPWORK}>
-            <span>Work with me on Upwork</span><Arrow size={18} />
-          </ExtLink>
+          <div className="cta-row">
+            <ExtLink className="cta" href={UPWORK}>
+              <span>Work with me on Upwork</span><Arrow size={18} />
+            </ExtLink>
+            <a className="cta cta-outline" href={`mailto:${EMAIL}`}>
+              <span>Email me directly</span><Arrow size={18} />
+            </a>
+          </div>
         </section>
 
-        <footer className="site-footer">
-          <div className="eyebrow">Raditya Perdhevi · Surabaya, Indonesia</div>
-          <div className="links">
-            {socials.map((s) => <ExtLink key={s.label} className="label-strong" href={s.href}>{s.label}</ExtLink>)}
-          </div>
-        </footer>
+        <SiteFooter />
       </div>
     </div>
   );

@@ -1,0 +1,469 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Neurons to Attention</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a single learning path, one numbered stage per section; prose on the left, a live bench on the right */
+:root{
+  --bg:#F3F6FA; --surface:#FFFFFF; --ink:#14213A; --muted:#5A6680; --line:#D8DFEA;
+  --pos:#2453D6; --neg:#D35E25; --gate:#0C977A; --hi:#E8EEFF;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1220; --surface:#151C2D; --ink:#E5EAF4; --muted:#95A1B9; --line:#29334A;
+  --pos:#7196FF; --neg:#FF8A57; --gate:#37D3A8; --hi:#1E2A48; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D1220; --surface:#151C2D; --ink:#E5EAF4; --muted:#95A1B9; --line:#29334A;
+  --pos:#7196FF; --neg:#FF8A57; --gate:#37D3A8; --hi:#1E2A48; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 64px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:56px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:1.6rem;font-weight:700;letter-spacing:-.01em}
+p{margin:0;max-width:62ch}
+code,.mono{font-family:var(--f-mono);font-size:.88em}
+header{display:flex;flex-direction:column;gap:14px}
+header p{color:var(--muted);font-size:1.1rem}
+.back{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);text-decoration:none;align-self:flex-start}
+.back:hover,.back:focus-visible{color:var(--pos)}
+.path{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.path a{font-family:var(--f-mono);font-size:.8rem;color:var(--ink);text-decoration:none;border:1px solid var(--line);
+  padding:4px 10px;border-radius:999px;background:var(--surface)}
+.path a:hover,.path a:focus-visible{border-color:var(--pos);outline:none}
+section{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:32px;align-items:start;scroll-margin-top:16px}
+@media (max-width:860px){section{grid-template-columns:minmax(0,1fr)}}
+.prose{display:flex;flex-direction:column;gap:12px}
+.step{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--pos)}
+.prose ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:4px}
+.bench{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.ctrls{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px 16px}
+.ctl{display:flex;flex-direction:column;gap:2px;font-size:.85rem}
+.ctl label{display:flex;justify-content:space-between;gap:8px;color:var(--muted)}
+.ctl output{font-family:var(--f-mono);color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--pos)}
+button,select{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);
+  padding:6px 12px;border-radius:6px;cursor:pointer}
+button:hover{border-color:var(--pos)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--pos);outline-offset:2px}
+button.primary{background:var(--pos);color:var(--surface);border-color:var(--pos)}
+.calc{font-family:var(--f-mono);font-size:.85rem;background:var(--bg);border-radius:6px;padding:10px 12px;overflow-x:auto;
+  white-space:pre;line-height:1.7;font-variant-numeric:tabular-nums}
+.calc .on{background:var(--hi);display:inline-block;border-radius:3px}
+.calc b{color:var(--gate);font-weight:600}
+svg{display:block;width:100%;height:auto}
+.t{fill:var(--ink);font-family:var(--f-mono);font-size:12px}
+.tm{fill:var(--muted);font-family:var(--f-mono);font-size:11px}
+.axis{stroke:var(--line);stroke-width:1}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:520px){.split{grid-template-columns:minmax(0,1fr)}}
+.cap{font-size:.8rem;color:var(--muted);font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.08em}
+.note{font-size:.92rem;color:var(--muted);border-left:2px solid var(--line);padding-left:12px}
+.status{font-family:var(--f-mono);font-size:.85rem;padding:3px 8px;border-radius:4px;background:var(--bg)}
+.good{color:var(--gate)} .bad{color:var(--neg)}
+table.mat{border-collapse:collapse;font-family:var(--f-mono);font-size:.85rem;font-variant-numeric:tabular-nums}
+table.mat td,table.mat th{padding:4px 10px;text-align:right;border-bottom:1px solid var(--line)}
+table.mat th{color:var(--muted);font-weight:400;font-size:.75rem}
+table.mat tr.on td{background:var(--hi)}
+.scroll{overflow-x:auto}
+.tokens{display:flex;flex-wrap:wrap;gap:6px}
+.tok{font-family:var(--f-mono);font-size:.85rem;padding:4px 8px;border-radius:5px;border:1px solid var(--line);background:var(--bg)}
+.tok.q{border-color:var(--pos);background:var(--hi);font-weight:600}
+.tok.mask{opacity:.4;text-decoration:line-through}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:70px minmax(0,1fr) 56px;gap:8px;align-items:center;font-family:var(--f-mono);font-size:.82rem;font-variant-numeric:tabular-nums}
+.bar .track{height:14px;background:var(--bg);border-radius:3px;position:relative;overflow:hidden}
+.bar .fill{position:absolute;top:0;bottom:0;left:0;background:var(--pos);border-radius:3px;transition:width .25s}
+.bar .fill.neg{background:var(--neg)}
+.bar .fill.g{background:var(--gate)}
+.bar span:last-child{text-align:right}
+.stages{display:flex;flex-wrap:wrap;gap:6px}
+.stages button{font-family:var(--f-mono);font-size:.8rem}
+.stages button[aria-pressed=true]{background:var(--pos);color:var(--surface);border-color:var(--pos)}
+.sentence{font-family:var(--f-mono);font-size:1rem}
+.sentence .new{color:var(--gate);font-weight:600}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <a class="back" href="/collection/">← Collection</a>
+  <span class="step">Interactive walkthrough</span>
+  <h1>From one neuron to attention</h1>
+  <p>Six stages, each building on the last. Move the sliders and watch the numbers change. Everything on this page is real arithmetic, computed live.</p>
+  <nav class="path">
+    <a href="#neuron">1 · Neuron</a><a href="#layer">2 · Layer = matrix</a><a href="#ffn">3 · Feed-forward net</a>
+    <a href="#attn">4 · Attention</a><a href="#pipeline">5 · Transformer</a><a href="#predict">6 · Next token</a>
+  </nav>
+</header>
+
+<!-- 1 NEURON -->
+<section id="neuron">
+  <div class="prose">
+    <span class="step">Stage 1</span>
+    <h2>A single neuron</h2>
+    <p>A neuron is just three things: a list of weights, one bias number, and an activation function.</p>
+    <ul>
+      <li>Multiply each input by its weight.</li>
+      <li>Add them up, then add the bias.</li>
+      <li>Pass the sum through the activation.</li>
+    </ul>
+    <p>Line thickness shows how big a weight is. <span style="color:var(--pos)">Blue</span> means positive, <span style="color:var(--neg)">orange</span> means negative.</p>
+    <p class="note">Try this: set the activation to ReLU and drag the bias down. Once the sum goes below zero, the neuron goes silent and outputs 0. That is the neuron deciding not to "fire".</p>
+  </div>
+  <div class="bench">
+    <div class="split">
+      <div><div class="cap">The neuron</div><svg id="nSvg" viewBox="0 0 360 220" aria-label="Neuron diagram"></svg></div>
+      <div><div class="cap">Activation function</div><svg id="aSvg" viewBox="0 0 360 220" aria-label="Activation plot"></svg></div>
+    </div>
+    <div class="ctrls" id="nCtrls"></div>
+    <div class="row">
+      <label for="actSel" class="cap">Activation</label>
+      <select id="actSel">
+        <option value="relu">ReLU: max(0, x)</option>
+        <option value="gelu">GELU (used in many LLMs)</option>
+        <option value="sigmoid">Sigmoid</option>
+        <option value="none">None (linear)</option>
+      </select>
+    </div>
+    <div class="calc" id="nCalc"></div>
+  </div>
+</section>
+
+<!-- 2 LAYER -->
+<section id="layer">
+  <div class="prose">
+    <span class="step">Stage 2</span>
+    <h2>A layer is a matrix</h2>
+    <p>In real code there is no <code>Neuron</code> class. A layer of 3 neurons that each read 2 inputs is stored as a 3×2 matrix. <b>Each row is one neuron's weights.</b></p>
+    <p>Running the whole layer is one line: <code>y = relu(W @ x + b)</code>. It does the same work as a loop over every neuron, but a GPU runs all the rows in parallel.</p>
+    <p>Press <b>Next row</b> to step through the matrix multiply one neuron at a time.</p>
+  </div>
+  <div class="bench">
+    <div class="ctrls" id="lCtrls"></div>
+    <div class="scroll"><table class="mat" id="lTable"></table></div>
+    <div class="row"><button id="lNext" class="primary">Next row</button><button id="lAll">Show all rows</button></div>
+    <div class="calc" id="lCalc"></div>
+    <div class="split">
+      <div><div class="cap">Loop version</div><div class="calc">for i in range(3):
+  s = b[i]
+  for j in range(2):
+    s += W[i][j] * x[j]
+  y[i] = relu(s)</div></div>
+      <div><div class="cap">Matrix version</div><div class="calc">y = relu(W @ x + b)
+
+# same result,
+# one GPU call</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 FFN -->
+<section id="ffn">
+  <div class="prose">
+    <span class="step">Stage 3</span>
+    <h2>A feed-forward network</h2>
+    <p>Stack layers so each one's output feeds the next. Data flows one direction, left to right, with no loops. That is all "feed-forward" means.</p>
+    <p>This is the exact shape of the MLP inside every transformer block: <b>expand</b> (4 → 8), apply the activation, then <b>shrink</b> back (8 → 4).</p>
+    <p>Node color shows the value: <span style="color:var(--pos)">blue</span> positive, <span style="color:var(--neg)">orange</span> negative, empty means zero.</p>
+    <p class="note">Turn the activation off and check the box underneath. Without it, the two layers give exactly the same answer as one combined matrix <code>W2 @ W1</code>. The depth was wasted. Turn ReLU back on and the shortcut no longer matches.</p>
+  </div>
+  <div class="bench">
+    <svg id="fSvg" viewBox="0 0 520 270" aria-label="Feed-forward network"></svg>
+    <div class="row">
+      <button id="fRun" class="primary">New input + run</button>
+      <label class="row" style="gap:6px"><input type="checkbox" id="fAct" checked> Apply ReLU in hidden layer</label>
+    </div>
+    <div class="calc" id="fCalc"></div>
+  </div>
+</section>
+
+<!-- 4 ATTENTION -->
+<section id="attn">
+  <div class="prose">
+    <span class="step">Stage 4</span>
+    <h2>Attention: tokens reading each other</h2>
+    <p>A feed-forward net handles each token alone. Attention is the step where a token pulls in information from other tokens.</p>
+    <ul>
+      <li><b>Scores</b> = Q·Kᵀ: how well the query "it" matches each key.</li>
+      <li><b>Softmax</b> turns scores into weights that are positive and sum to 1.</li>
+      <li><b>Output</b> = weighted mix of the value vectors.</li>
+    </ul>
+    <p>The struck-out tokens are in the future. A decoder's causal mask hides them, so "it" can only look backwards.</p>
+    <p class="note">Try this: turn softmax off and raise several scores. The output values grow past 1 and stop meaning anything. Then turn it back on and push the divisor up. The weights flatten out, which is what √d_k scaling does to huge scores.</p>
+  </div>
+  <div class="bench">
+    <div class="tokens" id="aTokens"></div>
+    <div class="ctrls" id="aCtrls"></div>
+    <div class="row">
+      <label class="row" style="gap:6px"><input type="checkbox" id="aSoft" checked> Apply softmax</label>
+      <div class="ctl" style="min-width:200px;flex:1"><label for="aDiv">Divide scores by (√d_k) <output id="aDivO"></output></label><input type="range" id="aDiv" min="0.5" max="4" step="0.1" value="1"></div>
+    </div>
+    <div class="split">
+      <div><div class="cap">Attention weights</div><div class="bars" id="aW"></div><div class="tm" id="aSum" style="margin-top:6px"></div></div>
+      <div><div class="cap">Output for "it" = Σ weight × V</div><div class="bars" id="aOut"></div></div>
+    </div>
+    <div class="calc" id="aCalc"></div>
+  </div>
+</section>
+
+<!-- 5 PIPELINE -->
+<section id="pipeline">
+  <div class="prose">
+    <span class="step">Stage 5</span>
+    <h2>The whole transformer</h2>
+    <p>Now put the pieces together. Click through each stage to see what the data looks like at that point.</p>
+    <p>The middle part, attention then MLP, is one <b>block</b>. Real models repeat it 30 to 100 times. Each block reads the running vector for every token and adds its update back on top, the residual stream.</p>
+  </div>
+  <div class="bench">
+    <div class="stages" id="pStages"></div>
+    <h3 id="pTitle" style="font-size:1.2rem"></h3>
+    <p id="pText"></p>
+    <div class="calc" id="pData"></div>
+    <div class="row"><button id="pPrev">Previous</button><button id="pNext" class="primary">Next stage</button></div>
+  </div>
+</section>
+
+<!-- 6 PREDICT -->
+<section id="predict">
+  <div class="prose">
+    <span class="step">Stage 6</span>
+    <h2>Picking the next token</h2>
+    <p>The last vector is scored against the whole vocabulary. These scores are called <b>logits</b>. Softmax turns them into probabilities, and one token is sampled.</p>
+    <p>It is the same softmax as in attention, used for a different job.</p>
+    <p class="note">Temperature divides the logits before softmax, just like √d_k. Low temperature makes the top choice dominate. High temperature makes unlikely tokens show up more often.</p>
+  </div>
+  <div class="bench">
+    <div class="sentence" id="sSent"></div>
+    <div class="ctl"><label for="sTemp">Temperature <output id="sTempO"></output></label><input type="range" id="sTemp" min="0.1" max="3" step="0.1" value="1"></div>
+    <div class="bars" id="sBars"></div>
+    <div class="row"><button id="sGo" class="primary">Sample next token</button><button id="sReset">Reset</button><span class="status" id="sStat"></span></div>
+  </div>
+</section>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = (n, d=1) => (n < 0 ? '−' : '') + Math.abs(n).toFixed(d);
+const SVGNS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent){ const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+const ACT = {
+  relu: x => Math.max(0,x),
+  gelu: x => 0.5*x*(1+Math.tanh(Math.sqrt(2/Math.PI)*(x+0.044715*x**3))),
+  sigmoid: x => 1/(1+Math.exp(-x)),
+  none: x => x
+};
+function slider(parent, id, label, min, max, step, val, onIn){
+  const d=document.createElement('div'); d.className='ctl';
+  d.innerHTML=`<label for="${id}">${label}<output id="${id}O"></output></label><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}">`;
+  parent.appendChild(d);
+  const inp=d.querySelector('input'), o=d.querySelector('output');
+  const upd=()=>{o.textContent=fmt(+inp.value); onIn();};
+  inp.addEventListener('input',upd); o.textContent=fmt(+inp.value);
+  return inp;
+}
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ---------- 1. NEURON ---------- */
+const nIn = [], nW = [];
+const nC = $('nCtrls');
+const defX=[2,3,1], defW=[0.5,-1,0.4];
+for(let i=0;i<3;i++) nIn.push(slider(nC,'x'+i,`input x${i+1}`,-3,3,0.1,defX[i],drawNeuron));
+for(let i=0;i<3;i++) nW.push(slider(nC,'w'+i,`weight w${i+1}`,-2,2,0.1,defW[i],drawNeuron));
+const nB = slider(nC,'nb','bias b',-3,3,0.1,0.6,drawNeuron);
+$('actSel').addEventListener('change',drawNeuron);
+
+function drawNeuron(){
+  const xs=nIn.map(i=>+i.value), ws=nW.map(i=>+i.value), b=+nB.value, a=$('actSel').value;
+  const s=xs.reduce((t,x,i)=>t+x*ws[i],b), out=ACT[a](s);
+  const svg=$('nSvg'); svg.innerHTML='';
+  const ys=[45,110,175], nx=225, ny=110;
+  ys.forEach((y,i)=>{
+    el('line',{x1:52,y1:y,x2:nx-36,y2:ny,stroke:ws[i]>=0?css('--pos'):css('--neg'),'stroke-width':0.6+Math.abs(ws[i])*3,'stroke-linecap':'round'},svg);
+    el('circle',{cx:34,cy:y,r:18,fill:css('--bg'),stroke:css('--line')},svg);
+    const t=el('text',{x:34,y:y+4,'text-anchor':'middle',class:'t'},svg); t.textContent=fmt(xs[i]);
+    const mx=(52+nx-36)/2, my=(y+ny)/2-8;
+    const wt=el('text',{x:mx,y:my,'text-anchor':'middle',class:'tm'},svg); wt.textContent='w'+(i+1)+'='+fmt(ws[i]);
+  });
+  const fire = Math.min(1,Math.abs(out)/4);
+  el('circle',{cx:nx,cy:ny,r:36,fill:out>0?css('--gate'):(out<0?css('--neg'):css('--bg')),'fill-opacity':out===0?1:0.15+fire*0.7,stroke:css('--ink'),'stroke-width':1.5},svg);
+  const t1=el('text',{x:nx,y:ny-4,'text-anchor':'middle',class:'tm'},svg); t1.textContent='Σ+b';
+  const t2=el('text',{x:nx,y:ny+12,'text-anchor':'middle',class:'t'},svg); t2.textContent=fmt(s,2);
+  el('line',{x1:nx+36,y1:ny,x2:326,y2:ny,stroke:css('--ink'),'stroke-width':1.5},svg);
+  el('polygon',{points:`326,${ny-5} 336,${ny} 326,${ny+5}`,fill:css('--ink')},svg);
+  const t3=el('text',{x:300,y:ny-12,'text-anchor':'middle',class:'t'},svg); t3.textContent='out '+fmt(out,2);
+  const t4=el('text',{x:nx,y:200,'text-anchor':'middle',class:'tm'},svg); t4.textContent= out===0&&a==='relu' ? 'silent (did not fire)' : 'bias '+fmt(b);
+  drawAct(a,s,out);
+  const terms=ws.map((w,i)=>`${fmt(w)}×${fmt(xs[i])}`).join(' + ');
+  $('nCalc').innerHTML=`sum = ${terms} + ${fmt(b)}
+    = ${fmt(s,2)}
+out = ${a}(${fmt(s,2)}) = <b>${fmt(out,2)}</b>`;
+}
+function drawAct(a,s,out){
+  const svg=$('aSvg'); svg.innerHTML='';
+  const X=v=>30+(v+5)/10*310, Y=v=>185-(v+2)/7*170;
+  el('line',{x1:30,y1:Y(0),x2:340,y2:Y(0),class:'axis'},svg);
+  el('line',{x1:X(0),y1:15,x2:X(0),y2:185,class:'axis'},svg);
+  [-4,-2,2,4].forEach(v=>{const t=el('text',{x:X(v),y:Y(0)+14,'text-anchor':'middle',class:'tm'},svg);t.textContent=v;});
+  [2,4].forEach(v=>{const t=el('text',{x:X(0)-6,y:Y(v)+4,'text-anchor':'end',class:'tm'},svg);t.textContent=v;});
+  let d=''; for(let i=0;i<=200;i++){const x=-5+i/20; const y=Math.max(-2,Math.min(5,ACT[a](x))); d+=(i?'L':'M')+X(x).toFixed(1)+' '+Y(y).toFixed(1);}
+  el('path',{d,fill:'none',stroke:css('--gate'),'stroke-width':2.5},svg);
+  const cs=Math.max(-5,Math.min(5,s)), co=Math.max(-2,Math.min(5,out));
+  el('line',{x1:X(cs),y1:Y(0),x2:X(cs),y2:Y(co),stroke:css('--muted'),'stroke-dasharray':'3 3'},svg);
+  el('circle',{cx:X(cs),cy:Y(co),r:6,fill:css('--pos'),stroke:css('--surface'),'stroke-width':2},svg);
+  const t=el('text',{x:36,y:28,class:'tm'},svg); t.textContent='x-axis: sum   y-axis: output';
+}
+
+/* ---------- 2. LAYER ---------- */
+const W2x=[[0.5,-1.0],[2.0,0.3],[-0.7,1.1]], bL=[1.0,0.0,-0.5];
+const lC=$('lCtrls');
+const lx=[slider(lC,'lx0','x1',-3,3,0.1,2,drawLayer), slider(lC,'lx1','x2',-3,3,0.1,3,drawLayer)];
+let lRow=0, lShowAll=false;
+$('lNext').onclick=()=>{lShowAll=false; lRow=(lRow+1)%3; drawLayer();};
+$('lAll').onclick=()=>{lShowAll=true; drawLayer();};
+function drawLayer(){
+  const x=lx.map(i=>+i.value);
+  const rows=W2x.map((r,i)=>{const s=r[0]*x[0]+r[1]*x[1]+bL[i]; return {s,y:ACT.relu(s)};});
+  let h='<tr><th></th><th>W[:,0]</th><th>W[:,1]</th><th>b</th><th></th><th>y = relu(·)</th></tr>';
+  W2x.forEach((r,i)=>{ const on=lShowAll||i===lRow;
+    h+=`<tr class="${on?'on':''}"><th>neuron ${i+1}</th><td>${fmt(r[0])}</td><td>${fmt(r[1])}</td><td>${fmt(bL[i])}</td><td>→</td><td>${on?fmt(rows[i].y,2):'?'}</td></tr>`;});
+  $('lTable').innerHTML=h;
+  const lines=W2x.map((r,i)=>{
+    const txt=`row ${i+1}: ${fmt(r[0])}×${fmt(x[0])} + ${fmt(r[1])}×${fmt(x[1])} + ${fmt(bL[i])} = ${fmt(rows[i].s,2)} → relu → ${fmt(rows[i].y,2)}`;
+    return (lShowAll||i===lRow)?`<span class="on">${txt}</span>`:`<span style="opacity:.35">${txt}</span>`;});
+  $('lCalc').innerHTML=lines.join('\n')+`\n\ny = [${rows.map(r=>fmt(r.y,2)).join(', ')}]`;
+}
+
+/* ---------- 3. FFN ---------- */
+let seed=7; const rnd=()=>{seed=(seed*16807)%2147483647; return seed/2147483647*2-1;};
+const F1=[...Array(8)].map(()=>[...Array(4)].map(()=>rnd()*1.2));
+const F2=[...Array(4)].map(()=>[...Array(8)].map(()=>rnd()*0.8));
+let fx=[1,-0.5,0.8,-1.2];
+const mv=(M,v)=>M.map(r=>r.reduce((t,w,j)=>t+w*v[j],0));
+const mm=(A,B)=>A.map(r=>B[0].map((_,j)=>r.reduce((t,a,k)=>t+a*B[k][j],0)));
+const F21=mm(F2,F1);
+$('fRun').onclick=()=>{fx=[...Array(4)].map(()=>+(Math.random()*4-2).toFixed(1)); drawFFN(true);};
+$('fAct').onchange=()=>drawFFN(true);
+function drawFFN(animate){
+  const act=$('fAct').checked;
+  const pre=mv(F1,fx), hid=pre.map(v=>act?ACT.relu(v):v), out=mv(F2,hid), short=mv(F21,fx);
+  const svg=$('fSvg'); svg.innerHTML='';
+  const Lx=[60,260,460], ys=n=>[...Array(n)].map((_,i)=>135+(i-(n-1)/2)*(n>4?29:52));
+  const yi=ys(4), yh=ys(8), yo=ys(4);
+  F1.forEach((r,h)=>r.forEach((w,i)=>el('line',{x1:Lx[0],y1:yi[i],x2:Lx[1],y2:yh[h],stroke:w>0?css('--pos'):css('--neg'),'stroke-opacity':0.12+Math.abs(w)*0.35,'stroke-width':1},svg)));
+  F2.forEach((r,o)=>r.forEach((w,h)=>el('line',{x1:Lx[1],y1:yh[h],x2:Lx[2],y2:yo[o],stroke:w>0?css('--pos'):css('--neg'),'stroke-opacity':0.12+Math.abs(w)*0.4,'stroke-width':1},svg)));
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const node=(x,y,v,delay,lab)=>{
+    const c=el('circle',{cx:x,cy:y,r:11,fill:css('--bg'),stroke:css('--ink'),'stroke-width':1.2},svg);
+    const t=el('text',{x:x+(x>400?16:(x<100?-16:0)),y:x>100&&x<400?y+3:y+4,'text-anchor':x>400?'start':(x<100?'end':'middle'),class:'tm'},svg);
+    const paint=()=>{ if(Math.abs(v)<1e-9){c.setAttribute('fill',css('--bg'));} else {c.setAttribute('fill',v>0?css('--pos'):css('--neg')); c.setAttribute('fill-opacity',Math.min(1,0.2+Math.abs(v)/2.5));}
+      if(lab) t.textContent=fmt(v); };
+    if(animate&&!reduce) setTimeout(paint,delay); else paint();
+  };
+  fx.forEach((v,i)=>node(Lx[0],yi[i],v,0,true));
+  hid.forEach((v,i)=>node(Lx[1],yh[i],v,350,false));
+  out.forEach((v,i)=>node(Lx[2],yo[i],v,700,true));
+  [['input (4)',Lx[0]],['hidden (8)',Lx[1]],['output (4)',Lx[2]]].forEach(([s,x])=>{const t=el('text',{x,y:262,'text-anchor':'middle',class:'tm'},svg);t.textContent=s;});
+  const silenced=pre.filter(v=>v<0).length;
+  const match=out.every((v,i)=>Math.abs(v-short[i])<1e-6);
+  $('fCalc').innerHTML=
+`hidden before activation: [${pre.map(v=>fmt(v)).join(', ')}]
+hidden after ${act?'ReLU':'(no activation)'}:   [${hid.map(v=>fmt(v)).join(', ')}]
+${act?`<b>${silenced} of 8 neurons silenced</b>`:'negatives pass straight through'}
+
+two layers  W2 @ f(W1 @ x): [${out.map(v=>fmt(v,2)).join(', ')}]
+one matrix  (W2 @ W1) @ x:  [${short.map(v=>fmt(v,2)).join(', ')}]
+${match?'<span class="bad">identical: the two layers collapsed into one</span>':'<span class="good">different: the activation made depth useful</span>'}`;
+}
+
+/* ---------- 4. ATTENTION ---------- */
+const toks=['The','cat','sat','because','it','was','tired'], Q=4;
+const V={The:[0,0,1],cat:[1,0,0],sat:[0,1,0],because:[0,0,1],it:[0.2,0,0.6]};
+const feats=['animal','action','grammar'];
+$('aTokens').innerHTML=toks.map((t,i)=>`<span class="tok ${i===Q?'q':''} ${i>Q?'mask':''}">${t}</span>`).join('');
+const aC=$('aCtrls'), defS=[0.5,4,1,0.2,1.5], aS=[];
+for(let i=0;i<=Q;i++) aS.push(slider(aC,'as'+i,`score q·k "${toks[i]}"`,-2,8,0.1,defS[i],drawAttn));
+$('aSoft').onchange=drawAttn;
+$('aDiv').addEventListener('input',()=>{$('aDivO').textContent=fmt(+$('aDiv').value);drawAttn();});
+$('aDivO').textContent='1.0';
+function barRow(label,val,max,cls){
+  const w=Math.min(100,Math.abs(val)/max*100);
+  return `<div class="bar"><span>${label}</span><span class="track"><span class="fill ${val<0?'neg':''} ${cls||''}" style="width:${w}%"></span></span><span>${fmt(val,2)}</span></div>`;
+}
+function drawAttn(){
+  const soft=$('aSoft').checked, dv=+$('aDiv').value;
+  const raw=aS.map(i=>+i.value), sc=raw.map(s=>s/dv);
+  let w;
+  if(soft){const m=Math.max(...sc), e=sc.map(s=>Math.exp(s-m)), Z=e.reduce((a,b)=>a+b,0); w=e.map(v=>v/Z);} else w=sc;
+  const sum=w.reduce((a,b)=>a+b,0);
+  $('aW').innerHTML=w.map((v,i)=>barRow(toks[i],v,soft?1:Math.max(1,...w.map(Math.abs)))).join('');
+  $('aSum').innerHTML=`sum of weights = ${fmt(sum,2)} ${soft?'<span class="good">(always 1)</span>':'<span class="bad">(not 1: not an average)</span>'}`;
+  const out=feats.map((_,f)=>w.reduce((t,wi,i)=>t+wi*V[toks[i]][f],0));
+  $('aOut').innerHTML=out.map((v,f)=>barRow(feats[f],v,1,'g')).join('');
+  const top=w.indexOf(Math.max(...w));
+  $('aCalc').innerHTML=
+`scores / ${fmt(dv)}  = [${sc.map(v=>fmt(v,2)).join(', ')}]
+weights      = ${soft?'softmax':'(raw)'} → [${w.map(v=>fmt(v,2)).join(', ')}]
+V["cat"]     = [${V.cat.join(', ')}]   features: ${feats.join(' / ')}
+
+"it" mostly reads from <b>"${toks[top]}"</b>`;
+}
+
+/* ---------- 5. PIPELINE ---------- */
+const stages=[
+  ['Tokenize','Text is split into tokens (word pieces). Each one becomes an integer ID from a fixed vocabulary.',
+   `"The cat sat"  →  ["The", " cat", " sat"]  →  [464, 3797, 3332]`],
+  ['Embed','Each ID looks up a row in a big learned matrix, the embedding table. Now every token is a vector.',
+   `464  → [ 0.12, −0.80,  0.33, ... ]   (4096 numbers)\n3797 → [ 0.91,  0.05, −0.47, ... ]\n\nembedding table shape: [vocab 50000 × 4096]`],
+  ['Position','Attention has no sense of order by itself, so position information is mixed in. Modern models use RoPE, which rotates Q and K based on the token\'s position.',
+   `token 0 "The"  → rotate by angle θ×0\ntoken 1 " cat" → rotate by angle θ×1\ntoken 2 " sat" → rotate by angle θ×2`],
+  ['Attention','Inside each block, every token computes Q, K, V with three linear layers, then reads from earlier tokens (Stage 4). Many heads run in parallel.',
+   `Q = x @ W_Q   K = x @ W_K   V = x @ W_V\nout = softmax(Q Kᵀ / √d_k + causal_mask) @ V\nx = x + out          # residual: add, don't replace`],
+  ['MLP','Then each token goes through the feed-forward net on its own: expand, activate, shrink (Stage 3).',
+   `h = gelu(x @ W1)     # 4096 → ~16000\nx = x + h @ W2       # 16000 → 4096, added back`],
+  ['Repeat ×N','Attention + MLP is one block. The vector x passes through 30 to 100 identical blocks, each with its own weights, each adding refinements.',
+   `x = embed(tokens)\nfor block in blocks:          # e.g. 32 blocks\n    x = x + attention(norm(x))\n    x = x + mlp(norm(x))`],
+  ['Unembed','The final vector of the last token is multiplied by one more matrix, giving one score (logit) per vocabulary entry.',
+   `logits = x[-1] @ W_unembed    # 4096 → 50000 scores\n" on" : 6.2   " down": 5.1   " quietly": 3.0  ...`],
+  ['Sample','Softmax turns logits into probabilities, a token is picked, appended, and the whole thing runs again. That loop is generation (Stage 6).',
+   `probs = softmax(logits / temperature)\nnext  = sample(probs)       # " on"\ntokens.append(next); repeat`]
+];
+let pi=0;
+$('pStages').innerHTML=stages.map((s,i)=>`<button data-i="${i}">${s[0]}</button>`).join('');
+$('pStages').onclick=e=>{const b=e.target.closest('button'); if(b){pi=+b.dataset.i; drawPipe();}};
+$('pPrev').onclick=()=>{pi=(pi+stages.length-1)%stages.length; drawPipe();};
+$('pNext').onclick=()=>{pi=(pi+1)%stages.length; drawPipe();};
+function drawPipe(){
+  [...$('pStages').children].forEach((b,i)=>b.setAttribute('aria-pressed',i===pi));
+  $('pTitle').textContent=`${pi+1}. ${stages[pi][0]}`; $('pText').textContent=stages[pi][1]; $('pData').textContent=stages[pi][2];
+}
+
+/* ---------- 6. PREDICT ---------- */
+const cand=[[' mat',3.1],[' floor',2.4],[' sofa',2.0],[' roof',0.9],[' banana',-1.0]];
+const base='The cat sat on the';
+let picked=null;
+$('sTemp').addEventListener('input',()=>{$('sTempO').textContent=fmt(+$('sTemp').value);drawPred();});
+$('sTempO').textContent='1.0';
+function probs(){const T=+$('sTemp').value, s=cand.map(c=>c[1]/T), m=Math.max(...s), e=s.map(v=>Math.exp(v-m)), Z=e.reduce((a,b)=>a+b,0); return e.map(v=>v/Z);}
+function drawPred(){
+  const p=probs();
+  $('sBars').innerHTML=cand.map((c,i)=>`<div class="bar"><span>${c[0].trim()}</span><span class="track"><span class="fill" style="width:${p[i]*100}%"></span></span><span>${(p[i]*100).toFixed(1)}%</span></div>`).join('')
+    +`<div class="tm">logits: ${cand.map(c=>c[0].trim()+' '+fmt(c[1])).join('  ')}</div>`;
+  $('sSent').innerHTML=base+(picked?`<span class="new">${picked}</span>`:' ▍');
+}
+$('sGo').onclick=()=>{const p=probs(); let r=Math.random(),i=0; while(i<p.length-1&&r>p[i]){r-=p[i];i++;}
+  picked=cand[i][0]; $('sStat').textContent=`sampled "${picked.trim()}" (p = ${(p[i]*100).toFixed(1)}%)`; drawPred();};
+$('sReset').onclick=()=>{picked=null; $('sStat').textContent=''; drawPred();};
+
+function redrawAll(){drawNeuron();drawLayer();drawFFN(false);drawAttn();drawPipe();drawPred();}
+redrawAll();
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redrawAll);
+new MutationObserver(redrawAll).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+</script>
+
+</body></html>
